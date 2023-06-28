@@ -12,8 +12,6 @@
 #define MAX_ALIAS_COUNT 10
 #define MAX_ALIAS_LENGTH 50
 
-
-
 char *ACMShell_read_line()
 {
     int bufsize = ACMShell_RL_BUFSIZE;
@@ -230,7 +228,11 @@ int display_history(char **args)
 char *builtin_str[] = {
     "cd",
     "help",
-    "history"};
+    "history",
+    "ls",
+    "echo",
+    "alias",
+    "logout"};
 
 int ACMShell_num_builtins()
 {
@@ -297,24 +299,32 @@ int ByteShell_execute(char **args)
         return 1;
     }
 
-    if (strcmp(args[0], "cd") == 0)
+    char *command = resolve(args[0]);
+
+    if (strcmp(command, "cd") == 0)
     {
         return ByteShell_cd(args);
     }
 
-    if (strcmp(args[0], "history") == 0)
+    if (strcmp(command, "history") == 0)
     {
         return display_history(args);
     }
 
-    if (strcmp(args[0], "help") == 0)
+    if (strcmp(command, "help") == 0)
     {
         return ACMShell_help(args);
     }
 
-    if (strcmp(args[0], "alias") == 0)
+    if (strcmp(command, "alias") == 0)
     {
         ACMShell_alias(args);
+        return 1;
+    }
+
+    if (strcmp(command, "logout") == 0)
+    {
+        return 0;
     }
 
     return ByteShell_launch(args);
@@ -332,7 +342,6 @@ int main()
         line = ACMShell_read_line();
         args = ACMShell_split_line(line);
         add_to_hist(args);
-        char *command = resolve(args[0]);
         status = ByteShell_execute(args);
 
         free(line);
